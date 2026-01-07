@@ -1,3 +1,3 @@
 <p align="center">
-  <img src="cover.gif" alt="typing" width="800">
+  <img src="typing.gif" alt="typing" width="800">
 </p>
