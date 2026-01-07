@@ -7,6 +7,7 @@
           justify-content: center;
           align-items: center;
           height: 50px;
+          position: relative;
         }
 
         .typing-text {
@@ -17,30 +18,36 @@
           overflow: hidden;
           border-right: 3px solid #3B82F6;
           width: 0;
-          position: absolute;
+          position: absolute; /* Stack them exactly on top of each other */
           opacity: 0;
-          animation: 
-            typing 4s steps(25, end) infinite,
-            blink 0.8s step-end infinite;
+          animation: typing-sequence 12s infinite; /* Total duration: 4s x 3 lines */
         }
 
-        /* Line 1 */
-        .line1 { animation-delay: 0s; opacity: 1; }
-        /* Line 2 */
+        /* Logic: Each line gets 1/3 of the total time (33.33%) */
+        .line1 { animation-delay: 0s; }
         .line2 { animation-delay: 4s; }
-        /* Line 3 */
         .line3 { animation-delay: 8s; }
 
-        @keyframes typing {
+        @keyframes typing-sequence {
+          /* 0% to 30%: Type in and stay visible */
           0% { width: 0; opacity: 1; }
-          40% { width: 100%; opacity: 1; }
-          90% { width: 100%; opacity: 1; }
+          5% { width: 100%; opacity: 1; }
+          30% { width: 100%; opacity: 1; }
+          /* 31% to 33%: Delete/Hide */
+          32% { width: 0; opacity: 1; }
+          33% { width: 0; opacity: 0; }
+          /* 34% to 100%: Stay hidden for other lines */
           100% { width: 0; opacity: 0; }
         }
 
+        /* Cursor blinking */
         @keyframes blink {
           from, to { border-color: transparent }
           50% { border-color: #3B82F6 }
+        }
+        
+        .typing-text {
+          animation: typing-sequence 12s infinite, blink 0.8s step-end infinite;
         }
       </style>
       <div class="wrapper">
