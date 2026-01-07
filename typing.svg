@@ -14,61 +14,84 @@
           font-size: 28px;
           color: #3B82F6;
           white-space: nowrap;
-          overflow: hidden;
-          border-right: 3px solid #3B82F6;
-          width: 0;
           position: absolute;
           opacity: 0;
+          clip-path: inset(0 100% 0 0);
         }
         
-        /* Line 1: 0-4s cycle */
+        .cursor {
+          display: inline-block;
+          width: 3px;
+          height: 32px;
+          background-color: #3B82F6;
+          margin-left: 2px;
+          vertical-align: middle;
+          animation: blink 0.8s step-end infinite;
+        }
+        
+        /* Line 1: 0-4s */
         .line1 {
-          animation: typing 2s steps(26) 0s 1 normal forwards,
-                     blink 0.8s step-end infinite,
-                     fadeout 0.3s 3.7s forwards;
+          animation: 
+            fadeIn 0s 0s forwards,
+            typeText 2s steps(26) 0s forwards,
+            fadeOut 0.3s 3.5s forwards;
         }
         
-        /* Line 2: 4-8s cycle */
+        /* Line 2: 4-8s */
         .line2 {
-          animation: typing 2s steps(18) 4s 1 normal forwards,
-                     blink 0.8s step-end 4s infinite,
-                     fadeout 0.3s 7.7s forwards;
+          animation: 
+            fadeIn 0s 4s forwards,
+            typeText 1.5s steps(18) 4s forwards,
+            fadeOut 0.3s 7.5s forwards;
         }
         
-        /* Line 3: 8-12s cycle */
+        /* Line 3: 8-12s */
         .line3 {
-          animation: typing 2s steps(17) 8s 1 normal forwards,
-                     blink 0.8s step-end 8s infinite,
-                     fadeout 0.3s 11.7s forwards;
+          animation: 
+            fadeIn 0s 8s forwards,
+            typeText 1.5s steps(17) 8s forwards,
+            fadeOut 0.3s 11.5s forwards;
         }
         
-        @keyframes typing {
-          from { 
-            width: 0; 
+        .wrapper {
+          animation: loop 12s infinite;
+        }
+        
+        @keyframes fadeIn {
+          to { 
             opacity: 1;
+            clip-path: inset(0 100% 0 0);
+          }
+        }
+        
+        @keyframes typeText {
+          from { 
+            clip-path: inset(0 100% 0 0);
           }
           to { 
-            width: 100%; 
-            opacity: 1;
+            clip-path: inset(0 0% 0 0);
           }
         }
         
-        @keyframes fadeout {
+        @keyframes fadeOut {
           to {
             opacity: 0;
-            width: 0;
           }
         }
         
         @keyframes blink {
-          from, to { border-color: transparent; }
-          50% { border-color: #3B82F6; }
+          from, to { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        
+        @keyframes loop {
+          0%, 100% { opacity: 1; }
         }
       </style>
       <div class="wrapper">
-        <div class="typing-text line1">Hi there, I'm Shahnewaz Alam</div>
-        <div class="typing-text line2">Software Developer</div>
-        <div class="typing-text line3">Coding Enthusiast</div>
+        <div class="typing-text line1">Hi there, I'm Shahnewaz Alam<span class="cursor"></span></div>
+        <div class="typing-text line2">Software Developer<span class="cursor"></span></div>
+        <div class="typing-text line3">Coding Enthusiast<span class="cursor"></span></div>
       </div>
     </div>
   </foreignObject>
