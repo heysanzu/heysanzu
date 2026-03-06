@@ -1,187 +1,784 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shahnewaz Alam</title>
-    <link rel="icon" type="image/png" href="sanzu.png">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-         }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shahnewaz Alam</title>
+  <link rel="icon" type="image/png" href="sanzu.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        @font-face {
-            font-family: 'SanzuFont'; 
-            src: url('fonts/comic_sans_regular.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap; 
-        }
+    @font-face {
+      font-family: 'SanzuFont';
+      src: url('fonts/comic_sans_regular.ttf') format('truetype');
+      font-weight: normal; font-style: normal; font-display: swap;
+    }
 
-        body {
-            background-color: #000000; 
-            color: #ffffff; 
-            font-family: "SanzuFont", "Comic Sans MS", "Comic Sans", cursive;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
+    :root {
+      --black: #000;
+      --white: #fff;
+      --gray: #888;
+      --gray-light: #bbb;
+      --gray-dim: #333;
+      --card: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.08);
+    }
 
-        header {
-            background-color: #111111;
-            border-bottom: 2px solid #333;
-            padding: 60px 20px;
-            text-align: center;
-        }
+    html { scroll-behavior: smooth; }
 
-        h1 { font-size: 3rem; margin: 10px 0; color: #fff; }
-        h2 { border-bottom: 2px solid #555; padding-bottom: 10px; color: #bbb; text-transform: uppercase; }
-        
-        .container {
-            max-width: 850px;
-            margin: auto;
-            padding: 20px;
-        }
+    body {
+      background: var(--black);
+      font-family: 'SanzuFont','Comic Sans MS','Comic Sans',cursive,sans-serif;
+      color: var(--white);
+      overflow-x: hidden;
+    }
 
-        section {
-            margin-bottom: 50px;
-            padding: 25px;
-            background: #111111;
-            border: 1px solid #444;
-            border-radius: 4px;
-        }
+    /* ── BG CANVAS ── */
+    #bg-canvas {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    }
 
-        .project-card {
-            background: #1a1a1a;
-            padding: 20px;
-            margin: 20px 0;
-            border-left: 8px solid #888;
-            transition: border-color 0.3s;
-        }
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      padding: 1rem 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+      background: rgba(0,0,0,0.55);
+      border-bottom: 1px solid var(--border);
+    }
 
-        .project-card:hover {
-            border-left-color: #fff;
-            background: #222;
-        }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo img {
+      width: 30px; height: 30px; border-radius: 8px;
+      filter: grayscale(100%);
+    }
+    .nav-logo span {
+      font-size: 1.1rem; font-weight: 700; color: var(--white);
+      letter-spacing: 0.04em;
+    }
 
-        .tag {
-            background: #333;
-            color: #aaa;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            margin-right: 8px;
-            border: 1px solid #555;
-        }
+    .nav-links {
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .nav-links a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 40px;
+      border: 1px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      letter-spacing: 0.04em;
+    }
+    .nav-links a:hover { color: var(--white); border-color: var(--border); }
 
-        a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-        }
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 5rem;
+      position: relative; z-index: 1;
+      overflow: hidden;
+    }
 
-        a:hover {
-            text-decoration: underline;
-            color: #ccc;
-        }
+    /* Radial spotlight */
+    .hero::before {
+      content: '';
+      position: absolute; top: -10%; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 900px;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    /* Grid */
+    .hero::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent);
+      pointer-events: none;
+    }
 
-        .social-links a {
-            display: inline-block;
-            margin-right: 25px;
-            font-size: 1.2rem;
-            padding: 10px 0;
-        }
+    /* Avatar */
+    .avatar-wrap {
+      position: relative;
+      margin-bottom: 2rem;
+      opacity: 0; animation: fadeUp 0.8s 0.1s ease forwards;
+      display: inline-block;
+    }
 
-        footer {
-            text-align: center;
-            padding: 50px;
-            font-size: 0.85rem;
-            color: #777;
-            border-top: 1px solid #333;
-        }
+    .avatar-ring {
+      position: absolute; inset: -8px;
+      border-radius: 22px;
+      background: conic-gradient(from 0deg, rgba(255,255,255,0), rgba(255,255,255,0.3), rgba(255,255,255,0));
+      animation: spinRing 6s linear infinite;
+      opacity: 0.4;
+    }
 
-        .profile-pic {
-            width: 140px;
-            height: 140px;
-            border-radius: 10px; 
-            border: 2px solid #888;
-            filter: grayscale(100%); 
-        }
-    </style>
+    @keyframes spinRing {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .avatar {
+      width: 130px; height: 130px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.15);
+      filter: grayscale(100%);
+      display: block;
+      position: relative; z-index: 1;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 24px 64px rgba(0,0,0,0.8);
+      transition: transform 0.1s ease-out;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--gray); font-size: 0.74rem;
+      padding: 0.32rem 0.9rem; border-radius: 40px;
+      margin-bottom: 1.4rem; letter-spacing: 0.08em; text-transform: uppercase;
+      opacity: 0; animation: fadeUp 0.7s 0.2s ease forwards;
+    }
+
+    .hero-name {
+      font-size: clamp(2.8rem, 9vw, 6.5rem);
+      font-weight: 700; letter-spacing: -0.03em; line-height: 1.05;
+      margin-bottom: 0.8rem;
+      background: linear-gradient(155deg, #fff 40%, rgba(255,255,255,0.32) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      opacity: 0; animation: fadeUp 0.7s 0.3s ease forwards;
+      filter: drop-shadow(0 4px 20px rgba(255,255,255,0.06));
+    }
+
+    .hero-role {
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      color: var(--gray); margin-bottom: 2.4rem;
+      opacity: 0; animation: fadeUp 0.7s 0.4s ease forwards;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-pills {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.6rem; flex-wrap: wrap; margin-bottom: 2.6rem;
+      opacity: 0; animation: fadeUp 0.7s 0.5s ease forwards;
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--gray-light); font-size: 0.78rem;
+      padding: 0.3rem 0.9rem; border-radius: 40px; font-family: inherit;
+    }
+
+    .hero-cta {
+      display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; justify-content: center;
+      opacity: 0; animation: fadeUp 0.7s 0.6s ease forwards;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 9px;
+      background: var(--white); color: var(--black);
+      font-family: inherit; font-size: 0.95rem; font-weight: 700;
+      padding: 0.85rem 2.2rem; border-radius: 60px; text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.15), 0 8px 28px rgba(255,255,255,0.08);
+      position: relative; overflow: hidden;
+    }
+    .btn-primary::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 0 1px rgba(255,255,255,0.25), 0 16px 48px rgba(255,255,255,0.13); }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--gray);
+      font-family: inherit; font-size: 0.95rem; font-weight: 500;
+      padding: 0.85rem 1.8rem; border-radius: 60px; text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: color 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .btn-ghost:hover { color: var(--white); border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
+
+    .scroll-cue {
+      position: absolute; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
+      opacity: 0; animation: fadeUp 0.7s 1s ease forwards;
+    }
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.28), transparent);
+      margin: 0 auto; animation: scrollPulse 2.2s ease-in-out infinite;
+    }
+
+    /* ── SECTIONS ── */
+    .page-section {
+      position: relative; z-index: 1;
+      padding: 7rem 5%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .section-eyebrow {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.25); margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700; letter-spacing: -0.025em;
+      margin-bottom: 2.8rem; color: var(--white);
+      position: relative;
+    }
+    .section-title::after {
+      content: '';
+      display: block; margin-top: 0.8rem;
+      width: 40px; height: 2px;
+      background: rgba(255,255,255,0.25);
+    }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+      align-items: start;
+    }
+    .about-text p {
+      color: rgba(255,255,255,0.6); line-height: 1.8; font-size: 0.96rem;
+      margin-bottom: 1rem;
+    }
+    .about-text strong { color: var(--white); }
+
+    .about-quote {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-left: 3px solid rgba(255,255,255,0.3);
+      border-radius: 0 16px 16px 0;
+      padding: 1.8rem 1.6rem;
+      color: rgba(255,255,255,0.5);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      font-style: italic;
+      position: relative;
+    }
+    .about-quote::before {
+      content: '"';
+      position: absolute; top: -10px; left: 18px;
+      font-size: 4rem; color: rgba(255,255,255,0.08);
+      line-height: 1; font-style: normal;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      position: relative; z-index: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      margin: 0 5%;
+    }
+
+    /* ── PROJECTS ── */
+    .projects-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem;
+    }
+
+    .proj-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px;
+      padding: 1.8rem 1.5rem 1.6rem;
+      position: relative; overflow: hidden;
+      cursor: default;
+      transition: box-shadow 0.3s;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .proj-card::before {
+      content: '';
+      position: absolute; top: 0; left: 15%; right: 15%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+    }
+
+    /* Top accent bar */
+    .proj-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+    .proj-card:hover::after { transform: scaleX(1); }
+
+    .proj-num {
+      font-size: 0.68rem; color: rgba(255,255,255,0.18);
+      letter-spacing: 0.14em; text-transform: uppercase;
+      margin-bottom: 1rem; display: block;
+    }
+
+    .proj-icon {
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.2rem;
+      font-size: 1.3rem;
+      transition: transform 0.3s, background 0.3s;
+    }
+    .proj-card:hover .proj-icon { transform: translateZ(24px) scale(1.1); background: rgba(255,255,255,0.12); }
+
+    .proj-title {
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--white); margin-bottom: 0.6rem;
+      transition: transform 0.3s;
+    }
+    .proj-card:hover .proj-title { transform: translateZ(16px); }
+
+    .proj-desc {
+      font-size: 0.8rem; color: rgba(255,255,255,0.45);
+      line-height: 1.6; margin-bottom: 1.3rem;
+    }
+
+    .proj-tags {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.4rem;
+    }
+    .tag {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.4); font-size: 0.7rem;
+      padding: 0.2rem 0.7rem; border-radius: 40px; font-family: inherit;
+    }
+
+    .proj-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: rgba(255,255,255,0.5); font-size: 0.78rem; text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      padding-bottom: 1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .proj-link:hover { color: var(--white); border-color: rgba(255,255,255,0.4); }
+    .proj-link::after { content: '→'; font-size: 0.85em; }
+
+    /* ── SOCIAL ── */
+    .social-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+    }
+
+    .social-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 1.5rem 1.2rem;
+      text-align: center;
+      text-decoration: none;
+      transition: box-shadow 0.3s;
+      transform-style: preserve-3d;
+      will-change: transform;
+      position: relative; overflow: hidden;
+    }
+    .social-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.3s;
+      pointer-events: none;
+    }
+    .social-card:hover::before { background: rgba(255,255,255,0.03); }
+
+    .social-icon {
+      font-size: 1.8rem; display: block;
+      margin-bottom: 0.6rem;
+      transition: transform 0.3s;
+    }
+    .social-card:hover .social-icon { transform: translateZ(20px) scale(1.15); }
+
+    .social-name {
+      display: block; font-size: 0.82rem; font-weight: 700;
+      color: var(--white); margin-bottom: 0.2rem;
+    }
+    .social-handle {
+      display: block; font-size: 0.72rem; color: rgba(255,255,255,0.3);
+    }
+
+    /* ── MORE / QUOTE ── */
+    .more-wrap {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 28px;
+      padding: 3rem 3rem 2.8rem;
+      position: relative; overflow: hidden;
+    }
+    .more-wrap::before {
+      content: '';
+      position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    }
+    .more-text {
+      color: rgba(255,255,255,0.5); font-size: 0.96rem;
+      line-height: 1.8; margin-bottom: 1.5rem; max-width: 600px;
+    }
+    .more-quote {
+      display: inline-block;
+      font-size: 1.05rem; font-style: italic;
+      color: rgba(255,255,255,0.35);
+      border-left: 2px solid rgba(255,255,255,0.15);
+      padding-left: 1.2rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 2rem 5%;
+    }
+    .footer-inner {
+      max-width: 1000px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-brand { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.25); letter-spacing: 0.05em; }
+    .footer-copy { font-size: 0.76rem; color: rgba(255,255,255,0.15); }
+    .footer-gh {
+      display: inline-flex; align-items: center; gap: 7px;
+      color: rgba(255,255,255,0.25); text-decoration: none;
+      font-size: 0.84rem; padding: 0.42rem 1rem;
+      border: 1px solid rgba(255,255,255,0.07); border-radius: 40px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .footer-gh:hover { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.18); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      0%   { opacity: 0; transform: translateY(22px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scrollPulse {
+      0%,100% { opacity: 0.3; } 50% { opacity: 1; }
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:760px){
+      .projects-grid { grid-template-columns: 1fr 1fr; }
+      .social-grid { grid-template-columns: 1fr 1fr; }
+      .about-grid { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: center; text-align: center; }
+      .nav-links { display: none; }
+    }
+    @media(max-width:480px){
+      .projects-grid { grid-template-columns: 1fr; }
+      .social-grid { grid-template-columns: 1fr 1fr; }
+      .hero-cta { flex-direction: column; width: 100%; }
+      .btn-primary,.btn-ghost { width: 100%; justify-content: center; }
+    }
+  </style>
 </head>
 <body>
 
-<header>
-    <img src="https://github.com/heysanzu.png" alt="Shahnewaz Alam" class="profile-pic">
-    <h1>Shahnewaz Alam</h1>
-    <p style="color: #888;">Developer & Creator of Sanzu</p>
-</header>
+<canvas id="bg-canvas"></canvas>
 
-<div class="container">
-    
-    <section id="about">
-        <h2>About Me</h2>
-        <p>
-            I'm a developer known as <strong>Sanzu </strong>(@heysanzu). I focus on building accessible educational tools, 
-            experimenting with Java, and creating offline-first applications that help people learn to code 
-            anywhere, anytime.
-        </p>
-    </section>
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <img src="sanzu.png" alt="Sanzu">
+    <span>heysanzu</span>
+  </a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#projects">Projects</a>
+    <a href="#social">Social</a>
+    <a href="https://heysanzu.github.io/sanzuPage/" target="_blank">Sanzu ↗</a>
+  </div>
+</nav>
 
-    <section id="projects">
-        <h2>My Projects</h2>
-        
-        <div class="project-card">
-            <h3>Sanzu - Python Learning App</h3>
-            <p>A comprehensive, 100% free offline Android app for learning Python. Includes theory, notes, and a built-in compiler.</p>
-            <span class="tag">Android SDK</span> <span class="tag">Android</span>
-            <br><br>
-            <a href="https://heysanzu.github.io/sanzuPage/" target="_blank">Launch Sanzu Page →</a>
-        </div>
+<!-- HERO -->
+<section class="hero">
+  <div class="avatar-wrap" id="avatarWrap">
+    <div class="avatar-ring"></div>
+    <img src="https://github.com/heysanzu.png" alt="Shahnewaz Alam" class="avatar" id="avatarImg">
+  </div>
+  <div class="hero-badge">Developer & Creator</div>
+  <h1 class="hero-name">Shahnewaz<br>Alam</h1>
+  <p class="hero-role">@heysanzu · Building open-source tools for education</p>
+  <div class="hero-pills">
+    <span class="pill">Android</span>
+    <span class="pill">Java</span>
+    <span class="pill">Python</span>
+    <span class="pill">Open Source</span>
+    <span class="pill">Offline-First</span>
+  </div>
+  <div class="hero-cta">
+    <a href="https://heysanzu.github.io/sanzuPage/" target="_blank" class="btn-primary">View Sanzu App ↗</a>
+    <a href="https://github.com/heysanzu" target="_blank" class="btn-ghost">GitHub</a>
+  </div>
+  <div class="scroll-cue"><div class="scroll-line"></div></div>
+</section>
 
-        <div class="project-card">
-            <h3>Java Collection</h3>
-            <p>A repository containing various Java implementations, from core logic to complex algorithms.</p>
-            <span class="tag">Java</span> <span class="tag">Algorithms</span>
-            <br><br>
-            <a href="https://github.com/heysanzu/Java" target="_blank">View GitHub Repo →</a>
-        </div>
-
-        <div class="project-card">
-            <h3>Python Collection</h3>
-            <p>A repository containing various Python implementations, from core logic to complex algorithms.</p>
-            <span class="tag">Python</span> <span class="tag">Algorithms</span>
-            <br><br>
-            <a href="https://github.com/heysanzu/Python" target="_blank">View GitHub Repo →</a>
-        </div>
-    </section>
-
-    <section id="social">
-        <h2>Social Media</h2>
-        <div class="social-links">
-            <a href="https://github.com/heysanzu" target="_blank">GitHub</a>
-            <a href="https://twitter.com/heysanzu" target="_blank">Twitter</a>
-            <a href="https://linkedin.com/in/heysanzu" target="_blank">LinkedIn</a>
-            <a href="https://instagram.com/heysanzu" target="_blank">Instagram</a>
-        </div>
-    </section>
-
-    <section id="more">
-        <h2>More</h2>
-        <p>
-            I believe in the power of open-source and free education. 
-            Currently exploring new ways to integrate mobile development with AI-driven learning.
-        </p>
-        <p><i>"Code is poetry for people who think in logic."</i></p>
-    </section>
-
+<!-- ABOUT -->
+<div class="divider"></div>
+<div class="page-section" id="about">
+  <p class="section-eyebrow reveal">Who I am</p>
+  <h2 class="section-title reveal">About Me</h2>
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <p>I'm a developer known as <strong>Sanzu</strong> (<strong>@heysanzu</strong>). I focus on building accessible educational tools, experimenting with Java, and creating offline-first applications that help people learn to code anywhere, anytime.</p>
+      <p>I believe in the power of open-source and free education. Currently exploring new ways to integrate mobile development with AI-driven learning.</p>
+    </div>
+    <div class="about-quote reveal">
+      Code is poetry for people who think in logic.
+    </div>
+  </div>
 </div>
 
+<!-- PROJECTS -->
+<div class="divider"></div>
+<div class="page-section" id="projects">
+  <p class="section-eyebrow reveal">What I've built</p>
+  <h2 class="section-title reveal">Projects</h2>
+  <div class="projects-grid">
+
+    <div class="proj-card reveal">
+      <span class="proj-num">01</span>
+      <div class="proj-icon">🐍</div>
+      <div class="proj-title">Sanzu</div>
+      <p class="proj-desc">A comprehensive, 100% free offline Android app for learning Python. Includes theory, notes, and a built-in compiler.</p>
+      <div class="proj-tags">
+        <span class="tag">Android SDK</span>
+        <span class="tag">Android</span>
+        <span class="tag">Offline</span>
+      </div>
+      <a href="https://heysanzu.github.io/sanzuPage/" target="_blank" class="proj-link">Launch Sanzu Page</a>
+    </div>
+
+    <div class="proj-card reveal">
+      <span class="proj-num">02</span>
+      <div class="proj-icon">☕</div>
+      <div class="proj-title">Java Collection</div>
+      <p class="proj-desc">A repository containing various Java implementations, from core logic to complex algorithms.</p>
+      <div class="proj-tags">
+        <span class="tag">Java</span>
+        <span class="tag">Algorithms</span>
+      </div>
+      <a href="https://github.com/heysanzu/Java" target="_blank" class="proj-link">View GitHub Repo</a>
+    </div>
+
+    <div class="proj-card reveal">
+      <span class="proj-num">03</span>
+      <div class="proj-icon">🐍</div>
+      <div class="proj-title">Python Collection</div>
+      <p class="proj-desc">A repository containing various Python implementations, from core logic to complex algorithms.</p>
+      <div class="proj-tags">
+        <span class="tag">Python</span>
+        <span class="tag">Algorithms</span>
+      </div>
+      <a href="https://github.com/heysanzu/Python" target="_blank" class="proj-link">View GitHub Repo</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- SOCIAL -->
+<div class="divider"></div>
+<div class="page-section" id="social">
+  <p class="section-eyebrow reveal">Find me online</p>
+  <h2 class="section-title reveal">Social Media</h2>
+  <div class="social-grid">
+    <a href="https://github.com/heysanzu" target="_blank" class="social-card reveal">
+      <span class="social-icon">🐙</span>
+      <span class="social-name">GitHub</span>
+      <span class="social-handle">@heysanzu</span>
+    </a>
+    <a href="https://twitter.com/heysanzu" target="_blank" class="social-card reveal">
+      <span class="social-icon">𝕏</span>
+      <span class="social-name">Twitter</span>
+      <span class="social-handle">@heysanzu</span>
+    </a>
+    <a href="https://linkedin.com/in/heysanzu" target="_blank" class="social-card reveal">
+      <span class="social-icon">💼</span>
+      <span class="social-name">LinkedIn</span>
+      <span class="social-handle">@heysanzu</span>
+    </a>
+    <a href="https://instagram.com/heysanzu" target="_blank" class="social-card reveal">
+      <span class="social-icon">📸</span>
+      <span class="social-name">Instagram</span>
+      <span class="social-handle">@heysanzu</span>
+    </a>
+  </div>
+</div>
+
+<!-- MORE -->
+<div class="divider"></div>
+<div class="page-section">
+  <div class="more-wrap reveal">
+    <p class="more-text">I believe in the power of open-source and free education. Currently exploring new ways to integrate mobile development with AI-driven learning. Every project I build is made to be accessible, lightweight, and genuinely useful.</p>
+    <span class="more-quote">"Code is poetry for people who think in logic."</span>
+  </div>
+</div>
+
+<!-- FOOTER -->
 <footer>
-    &copy; 2026-27 Shahnewaz Alam
+  <div class="footer-inner">
+    <span class="footer-brand">Shahnewaz Alam</span>
+    <a href="https://github.com/heysanzu" target="_blank" class="footer-gh">
+      GitHub · @heysanzu
+    </a>
+    <span class="footer-copy">© 2026–27 Shahnewaz Alam</span>
+  </div>
 </footer>
 
+<script>
+/* ================================================================
+   1. BACKGROUND PARTICLE FIELD
+================================================================ */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+  camera.position.z = 30;
+
+  // Particles
+  const count = 2000;
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    pos[i*3]   = (Math.random() - 0.5) * 130;
+    pos[i*3+1] = (Math.random() - 0.5) * 130;
+    pos[i*3+2] = (Math.random() - 0.5) * 70;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1, transparent: true, opacity: 0.3, sizeAttenuation: true });
+  scene.add(new THREE.Points(geo, mat));
+
+  // Wireframe shapes
+  const geoms = [
+    new THREE.IcosahedronGeometry(1.2, 0),
+    new THREE.OctahedronGeometry(1.0, 0),
+    new THREE.TetrahedronGeometry(1.1, 0),
+  ];
+  const shapes = [];
+  for (let i = 0; i < 10; i++) {
+    const m = new THREE.Mesh(
+      geoms[i % geoms.length],
+      new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.045 })
+    );
+    m.position.set((Math.random()-0.5)*90, (Math.random()-0.5)*90, (Math.random()-0.5)*30 - 15);
+    const s = Math.random() * 3.5 + 1;
+    m.scale.set(s, s, s);
+    m._rx = (Math.random()-0.5)*0.003;
+    m._ry = (Math.random()-0.5)*0.003;
+    scene.add(m);
+    shapes.push(m);
+  }
+
+  let mx = 0, my = 0;
+  document.addEventListener('mousemove', e => {
+    mx = (e.clientX / window.innerWidth - 0.5) * 2;
+    my = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  let t = 0;
+  (function loop() {
+    requestAnimationFrame(loop);
+    t += 0.004;
+    const pts = scene.children[0];
+    pts.rotation.y = mx * 0.04 + t * 0.018;
+    pts.rotation.x = -my * 0.04;
+    shapes.forEach(s => { s.rotation.x += s._rx; s.rotation.y += s._ry; });
+    renderer.render(scene, camera);
+  })();
+})();
+
+/* ================================================================
+   2. AVATAR 3D TILT
+================================================================ */
+const avatarImg = document.getElementById('avatarImg');
+document.addEventListener('mousemove', e => {
+  const cx = window.innerWidth / 2, cy = window.innerHeight * 0.4;
+  const x = (e.clientX - cx) / cx;
+  const y = (e.clientY - cy) / cy;
+  avatarImg.style.transform = `perspective(600px) rotateY(${x * 18}deg) rotateX(${-y * 18}deg) scale(1.04)`;
+});
+
+/* ================================================================
+   3. PROJECT CARD 3D TILT
+================================================================ */
+document.querySelectorAll('.proj-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width  - 0.5;
+    const y = (e.clientY - r.top)  / r.height - 0.5;
+    card.style.transform = `perspective(900px) rotateY(${x * 16}deg) rotateX(${-y * 16}deg) translateZ(8px)`;
+    card.style.boxShadow = `${-x * 24}px ${-y * 24}px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1)`;
+    const icon = card.querySelector('.proj-icon');
+    const title = card.querySelector('.proj-title');
+    if (icon) icon.style.transform = `translateZ(36px) translateX(${x*10}px) translateY(${y*10}px)`;
+    if (title) title.style.transform = `translateZ(20px)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+    card.style.boxShadow = '';
+    const icon = card.querySelector('.proj-icon');
+    const title = card.querySelector('.proj-title');
+    if (icon) icon.style.transform = '';
+    if (title) title.style.transform = '';
+  });
+});
+
+/* ================================================================
+   4. SOCIAL CARD 3D TILT
+================================================================ */
+document.querySelectorAll('.social-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width  - 0.5;
+    const y = (e.clientY - r.top)  / r.height - 0.5;
+    card.style.transform = `perspective(700px) rotateY(${x * 20}deg) rotateX(${-y * 20}deg) translateZ(6px)`;
+    card.style.boxShadow = `${-x*16}px ${-y*16}px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)`;
+    const icon = card.querySelector('.social-icon');
+    if (icon) icon.style.transform = `translateZ(28px) scale(1.15)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+    card.style.boxShadow = '';
+    const icon = card.querySelector('.social-icon');
+    if (icon) icon.style.transform = '';
+  });
+});
+
+/* ================================================================
+   5. SCROLL REVEAL
+================================================================ */
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      obs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
 </body>
 </html>
